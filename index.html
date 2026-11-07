@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste de Monitor · Píxeis mortos, Hz reais, ghosting e mais</title>
+  <meta name="description" content="Testa o teu monitor no browser: píxeis mortos e presos, taxa de atualização real (Hz), ghosting, backlight bleed, uniformidade, gradientes e nitidez.">
+  <meta name="theme-color" content="#0d0f14">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="./" class="brand">
+    <img src="icons/icon-192.png" alt="" width="30" height="30">
+    <span>Teste de <b>Monitor</b></span>
+  </a>
+</header>
+
+<main id="home">
+  <section class="hero">
+    <h1>O teu monitor está <span>bom</span>?</h1>
+    <p>Testes em ecrã inteiro para encontrar píxeis mortos, confirmar os Hz reais, ver ghosting, fugas de luz e muito mais.
+       Funciona no browser, sem instalar nada.</p>
+  </section>
+
+  <section class="info" aria-label="Informação do ecrã">
+    <div><span>Resolução</span><b id="i-res">—</b></div>
+    <div><span>Escala do Windows</span><b id="i-dpr">—</b></div>
+    <div><span>Taxa de atualização</span><b id="i-hz">a medir…</b></div>
+    <div><span>Profundidade de cor</span><b id="i-depth">—</b></div>
+    <div><span>HDR</span><b id="i-hdr">—</b></div>
+  </section>
+
+  <section class="tests">
+    <button class="test" data-test="cores">
+      <span class="swatch" style="background:linear-gradient(90deg,#f00,#0f0,#00f,#fff,#000)"></span>
+      <h2>Píxeis mortos e presos</h2>
+      <p>Cores sólidas em ecrã inteiro para encontrar píxeis que não acendem ou ficam sempre com a mesma cor.</p>
+    </button>
+    <button class="test" data-test="reparar">
+      <span class="swatch flash"></span>
+      <h2>Reparar píxel preso</h2>
+      <p>Pisca cores muito depressa numa zona para tentar "acordar" um píxel preso.</p>
+    </button>
+    <button class="test" data-test="hz">
+      <span class="swatch" style="background:repeating-linear-gradient(90deg,#3dd68c 0 6px,transparent 6px 14px)"></span>
+      <h2>Hz reais e frames perdidos</h2>
+      <p>Mede a taxa de atualização que o monitor está mesmo a usar e deteta frames saltados.</p>
+    </button>
+    <button class="test" data-test="movimento">
+      <span class="swatch" style="background:linear-gradient(90deg,#222 0 40%,#4cc3ff 40% 55%,#222 55%)"></span>
+      <h2>Ghosting e motion blur</h2>
+      <p>Objetos em movimento a várias velocidades para ver rastos e desfocagem.</p>
+    </button>
+    <button class="test" data-test="uniformidade">
+      <span class="swatch" style="background:radial-gradient(circle at 10% 10%,#333,#000 40%)"></span>
+      <h2>Backlight bleed e uniformidade</h2>
+      <p>Preto e cinzentos em ecrã inteiro para ver fugas de luz, manchas e zonas mais escuras.</p>
+    </button>
+    <button class="test" data-test="gradiente">
+      <span class="swatch" style="background:linear-gradient(90deg,#000,#fff)"></span>
+      <h2>Gradientes (banding)</h2>
+      <p>Gradientes suaves para ver se aparecem "degraus" ou faixas de cor.</p>
+    </button>
+    <button class="test" data-test="contraste">
+      <span class="swatch" style="background:linear-gradient(90deg,#000 0 50%,#fff 50%)"></span>
+      <h2>Níveis de preto e branco</h2>
+      <p>Verifica se distingues os tons mais escuros e mais claros (brilho e contraste).</p>
+    </button>
+    <button class="test" data-test="nitidez">
+      <span class="swatch" style="background:repeating-conic-gradient(#fff 0 25%,#000 0 50%) 0 0/6px 6px"></span>
+      <h2>Nitidez e escala</h2>
+      <p>Padrões de 1 píxel e texto para ver se a imagem está nítida ou desfocada.</p>
+    </button>
+  </section>
+
+  <section class="help">
+    <h2>Como usar</h2>
+    <ul>
+      <li><b>Clique</b>, <kbd>Espaço</kbd> ou <kbd>→</kbd> para o passo seguinte · <kbd>←</kbd> para voltar</li>
+      <li><kbd>H</kbd> mostra/esconde as instruções · <kbd>Esc</kbd> sai do teste</li>
+      <li>Limpa o ecrã antes de começar: pó parece um píxel morto!</li>
+    </ul>
+  </section>
+</main>
+
+<!-- Palco dos testes (ecrã inteiro) -->
+<div id="stage" hidden>
+  <canvas id="canvas"></canvas>
+  <div id="layer"></div>
+  <div id="hud">
+    <div id="hud-title"></div>
+    <div id="hud-text"></div>
+    <div id="hud-keys">← → mudar · H esconder · Esc sair</div>
+  </div>
+  <button id="exit" aria-label="Sair do teste">✕</button>
+</div>
+
+<!-- Aviso de fotossensibilidade -->
+<div class="overlay" id="warn" hidden>
+  <div class="dialog">
+    <h2>⚠️ Luzes a piscar</h2>
+    <p>Este teste pisca cores muito depressa. Não o uses se tiveres epilepsia fotossensível ou
+       sensibilidade a luzes intermitentes. Evita olhar diretamente para a zona a piscar.</p>
+    <div class="actions">
+      <button class="btn primary" id="warn-ok">Compreendo, continuar</button>
+      <button class="btn" id="warn-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Feito por <a href="https://gui198gui.github.io" target="_blank" rel="noopener">Guilherme Martins</a> ·
+  <a href="https://github.com/gui198gui/teste-monitor" target="_blank" rel="noopener">Código no GitHub</a>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>
